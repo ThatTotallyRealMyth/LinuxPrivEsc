@@ -16,6 +16,9 @@ john --format=sha512crypt hashes.txt
 find / -name id_rsa 2>/dev/null | xargs ls -la
 find / -name "*.pem" 2>/dev/null | xargs ls -la
 
+#Find p12 files that may contain hardcoded private keys that one may be able to compromise
+find / -name "*.p12" 2>/dev/null | xargs ls -al
+
 # Check for private backups with weak permissions
 find / -name "*backup*" -o -name "*.bak" -o -name "*.old" 2>/dev/null | xargs ls -la
 
@@ -40,6 +43,9 @@ find / -name .htpasswd -readable 2>/dev/null
 
 # Look for plaintext credentials in web application configs
 find /var/www -type f -name "wp-config.php" -o -name "configuration.php" -o -name "config.inc.php" 2>/dev/null | xargs grep -l -i "password\|user"
+
+#Find readable config files in /etc directory as that usually contains custom application configs
+find /etc -type f -iname "*.conf" -readable 2>/dev/null
 ```
 
 ## Methodology Checklist
