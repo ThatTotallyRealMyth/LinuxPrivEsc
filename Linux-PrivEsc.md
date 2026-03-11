@@ -1038,6 +1038,9 @@ lsof -u root | grep REG | grep -v "mem" | grep -v "txt" | grep -v "cwd" | grep -
 
 # Find scripts in PATH that are executed by root but writable by you
 for p in $(echo $PATH | tr ":" " "); do find $p -writable -type f 2>/dev/null; done
+
+#Find all writable .sh or shell script files as these may be valid targets
+find / -type f -iname "*.sh" -writable 2>/dev/null
 ```
 
 ## 📡 Service Exploitation (MySQL, Apache, etc.)
