@@ -64,7 +64,7 @@
   - [Automated Kernel Exploit Detection](#automated-kernel-exploit-detection)
   - [Common Kernel Exploits](#common-kernel-exploits)
 
----
+
 
 ## Methodology Checklist
 
